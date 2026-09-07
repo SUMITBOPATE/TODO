@@ -19,18 +19,40 @@ fetchTodos()
 
 
 
-function handleAddToDo() {
+async function handleAddToDo() {
   if (title.trim() === "") {
     return
   }
-  const newTodo = {
-    id: Date.now(),
-    title: title,
-    completed: false
-  }
+
+  const response = await fetch("http://localhost:3000/api/tasks", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: title,
+      completed: false,
+    }),
+  });
+
+  const newTodo = await response.json()
+
   setTodos([...todos, newTodo])
   setTitle("")
 }
+
+// function handleAddToDo() {
+//   if (title.trim() === "") {
+//     return
+//   }
+//   const newTodo = {
+//     id: Date.now(),
+//     title: title,
+//     completed: false
+//   }
+//   setTodos([...todos, newTodo])
+//   setTitle("")
+// }
 
 
 // Click checkbox → handleToggleTodo(id)
@@ -40,22 +62,42 @@ function handleAddToDo() {
 // setTodos
 //  React re-renders
 
-function handleToggleTodo(id) {
+
+
+
+async function handleToggleTodo(id) {
+   const todoToUpdate = todos.find((todo) => todo.id === id)
+   const updateCompleted= !todoToUpdate.completed
+
+  const response = await  fetch(`http://localhost:3000/api/tasks/${id}`,{
+  method: "PATCH",
+    headers:{
+      "Content-Type": "application/json", 
+    },
+  body: JSON .stringify ({
+    completed: updateCompleted,
+  }),
+  })
+
+  const updatedTodo =await response.json()
+
   const updatedTodos = todos.map((todo) => {
     if (todo.id === id) {
-      return {
-        ...todo,
-        completed: !todo.completed,
-      }
+      return updatedTodo;
+       
+      
     }
-
-    return todo
+  
+    return todo;
   })
 
   setTodos(updatedTodos)
 }
 
-function handleDeleteTodo(id) {
+async function handleDeleteTodo(id) {
+  await fetch(`http://localhost:3000/api/tasks/${id}`,{
+    method : "DELETE",
+      })
   const updatedTodos = todos.filter((todo) => todo.id !== id)
 
   setTodos(updatedTodos)

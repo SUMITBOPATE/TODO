@@ -1,5 +1,5 @@
 
-
+const pool = require("../db")
 
 
   let tasks = [
@@ -15,8 +15,9 @@
     },
 ];
 
-const getAllTasks = (req, res) => {
-    res.status(200).json(tasks);
+const getAllTasks = async (req, res) => {
+    const result = await pool.query("SELECT * FROM Tasks ORDER BY id ASC");
+    res.status(200).json(result.rows);
 };
 
 const getTaskById = (req, res) => {
@@ -30,7 +31,7 @@ const getTaskById = (req, res) => {
     res.status(200).json(task);
 };
 
-const  createTask=(req,res)=>{
+const  createTask= async (req,res)=>{
     const title=req.body.title;
     const completed=req.body.completed  ?? false;
 if (!title) {
@@ -38,14 +39,19 @@ if (!title) {
     message: "Tittle is required ",
   });
 }
-    const id =tasks.length+1;
-    const newtask={
-      id : id ,
-      title: title,
-      completed: completed
-    }
- tasks.push (newtask);
- res.status(201).json(newtask);
+    // const id =tasks.length+1;
+    // const newtask={
+    //   id : id ,
+    //   title: title,
+    //   completed: completed
+    // }
+
+
+  const result = await  pool.query(
+    "INSERT INTO tasks (title,completed)  VALUES ($1,$2) RETURNING *",
+     [title,completed])
+ 
+ res.status(201).json(result.rows[0]);
 }
 
 const deleteTask =(req,res)=>{
@@ -61,6 +67,24 @@ const deleteTask =(req,res)=>{
 
 }
 
+const updateTask = (req, res) => {
+const id =Number(req.params.id)
+const { title, completed } = req.body;
+const task = tasks.find((task) => task.id === id);
+if (!task) {
+  return res.status(404).json({
+    message: "Task not found",
+  });
+}
+if(title!= undefined ){
+    task.title=title;
+}
+if (completed!= undefined)
+{
+    task.completed=completed;
+}
+return res.status(200).json(task);
+}
 
 
 module.exports = {
@@ -68,4 +92,5 @@ module.exports = {
     getTaskById,
     createTask,
     deleteTask,
+    updateTask ,
 };
