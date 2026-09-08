@@ -95,9 +95,15 @@ async function handleToggleTodo(id) {
 }
 
 async function handleDeleteTodo(id) {
-  await fetch(`http://localhost:3000/api/tasks/${id}`,{
+  const response = await fetch(`http://localhost:3000/api/tasks/${id}`,{
     method : "DELETE",
-      })
+  })
+
+  if (!response.ok) {
+    console.error("Could not delete task", await response.text())
+    return
+  }
+
   const updatedTodos = todos.filter((todo) => todo.id !== id)
 
   setTodos(updatedTodos)

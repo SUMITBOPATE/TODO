@@ -54,18 +54,18 @@ if (!title) {
  res.status(201).json(result.rows[0]);
 }
 
-const deleteTask =(req,res)=>{
-    const taskId  = Number(req.params.id)
-    const task=tasks.find((task)=>task.id==taskId);
-   if(!task){
-    return res.status(404).json({
-        message:    "task not found ",
-    })
-   }
-   tasks = tasks.filter((task) => task.id !== taskId);
-  res.status(200).json({ message: "Task deleted successfully" });
+const deleteTask = async (req, res) => {
+  const result = await pool.query(
+    "DELETE FROM tasks WHERE id = $1 RETURNING *",
+    [req.params.id],
+  );
 
-}
+  if (result.rowCount === 0) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+
+  res.status(200).json({ message: "Task deleted successfully" });
+};
 
 const updateTask = (req, res) => {
 const id =Number(req.params.id)
