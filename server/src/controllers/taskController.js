@@ -20,7 +20,7 @@ const getAllTasks = async (req, res) => {
     res.status(200).json(result.rows);
 };
 
-const getTaskById = (req, res) => {
+const getTaskById = async (req, res) => {
     const taskId = Number(req.params.id);
     const task = tasks.find((task) => task.id === taskId);
 
@@ -55,35 +55,37 @@ if (!title) {
 }
 
 const deleteTask = async (req, res) => {
+ 
+
   const result = await pool.query(
     "DELETE FROM tasks WHERE id = $1 RETURNING *",
-    [req.params.id],
-  );
+    [req.params.id]
+  )
 
-  if (result.rowCount === 0) {
-    return res.status(404).json({ message: "Task not found" });
+  if (result.rows.length === 0) {
+    return res.status(404).json({
+      message: "Task not found",
+    })
   }
 
-  res.status(200).json({ message: "Task deleted successfully" });
-};
-
-const updateTask = (req, res) => {
-const id =Number(req.params.id)
-const { title, completed } = req.body;
-const task = tasks.find((task) => task.id === id);
-if (!task) {
+  res.status(200).json({
+    message: "Task deleted successfully",
+  })
+}
+const updateTask = async (req, res) => {
+const {completed }= req.body;
+const result =await pool.query (
+  "UPDATE tasks SET completed =$1 WHERE id= $2  RETURNING * ",
+  [completed ,req.params.id]
+)
+;
+if (result.rowCount ===0 ) {
   return res.status(404).json({
     message: "Task not found",
   });
 }
-if(title!= undefined ){
-    task.title=title;
-}
-if (completed!= undefined)
-{
-    task.completed=completed;
-}
-return res.status(200).json(task);
+
+return res.status(200).json(result.rows[0]);
 }
 
 
