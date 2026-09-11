@@ -1,18 +1,42 @@
 
-import './App.css'
 import { useEffect,useState } from 'react';
+import {
+  DrawablyAlert,
+  DrawablyButton,
+  DrawablyCheckbox,
+  DrawablyInput,
+  DrawablyUnderline,
+} from 'drawably/react'
+import 'drawably/style.css'
+import './App.css'
 function App() {
 
   const [title,setTitle ]  =useState("")
 const [todos, setTodos] = useState([])
 const [loading, setLoading] = useState(true)
+const [error, setError] = useState("")
+
+
   useEffect (()=>{
 async function fetchTodos(){
   setLoading(true)
+  setError("")
+     try {
   const response = await fetch("http://localhost:3000/api/tasks")
+  if (! response.ok){
+    throw new Error   (`HTTP error! status: ${response.status}`);
+  }
+
   const data = await response.json();
   setTodos(data)
-  setLoading(false)
+     }
+     catch (error){
+      console.error("Could not load tasks:", error)
+      setError("Could not load tasks. Please try again.")
+     }
+     finally {
+      setLoading(false)
+     }
 }
 fetchTodos()
   },[])
@@ -117,28 +141,32 @@ const completedCount = todos.filter((todo) => todo.completed).length
       <section className="todo-panel">
         <header className="todo-header">
           <p className="eyebrow">Full-stack Todo</p>
-          <h1>Todo App</h1>
+          <h1><DrawablyUnderline boil={0.12}>Todo App</DrawablyUnderline></h1>
           <p className="subtitle">Add tasks, track progress, and keep your day clear.</p>
         </header>
 
         <div className="todo-form">
-          <input
-          value={title}
-        onChange={(event)=> setTitle(event.target.value)}
+          <DrawablyInput
+            value={title}
+            onChange={(event)=> setTitle(event.target.value)}
             className="todo-input"
             type="text"
             placeholder="Write a new task..."
           />
-          <button  onClick={handleAddToDo} className="add-button" type="button">
+          <DrawablyButton onClick={handleAddToDo} className="add-button" variant="solid" boil={0.12}>
             Add
-          </button>
+          </DrawablyButton>
         </div>
 
         <div className="todo-summary">
           <span>Total: {todos.length}</span>
           <span>Completed: {completedCount}</span>
         </div>
-{loading && <p>Loading todos...</p>}
+ {loading && <p className="status-message" role="status">Loading todos...</p>}
+ {error && <DrawablyAlert className="status-message error-message" role="alert">{error}</DrawablyAlert>}
+ { !loading && !error && todos.length === 0 && (
+   <p className="empty-state">No tasks yet. Add your first task above.</p>
+ )}
         <ul className="todo-list">
           {todos.map((todo) => (
    <li
@@ -146,18 +174,21 @@ const completedCount = todos.filter((todo) => todo.completed).length
   key={todo.id}
 >
               <label className="todo-check">
-                <input type="checkbox" checked={todo.completed} 
-                onChange={() => handleToggleTodo(todo.id)}
+                <DrawablyCheckbox
+                  checked={todo.completed}
+                  onChange={() => handleToggleTodo(todo.id)}
+                  boil={0.12}
                 />
                 <span>{todo.title}</span>
               </label>
-              <button
+              <DrawablyButton
                 onClick={() => handleDeleteTodo(todo.id)}
                 className="delete-button"
-                type="button"
+                tone="danger"
+                boil={0.12}
               >
                 Delete
-              </button>
+              </DrawablyButton>
             </li>
           ))}
         </ul>
