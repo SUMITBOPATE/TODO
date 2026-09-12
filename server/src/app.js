@@ -5,6 +5,18 @@ const cors = require("cors");
   const pool= require("./db")
 
 
+
+  async function connectToDatabase() {
+  try {
+    await pool.query("SELECT 1");
+    console.log("Database connected");
+  } catch (error) {
+    console.error("Database connection failed:", error);
+  }
+}
+
+connectToDatabase();
+
   app.use(express.json());
   app.use(cors());
 

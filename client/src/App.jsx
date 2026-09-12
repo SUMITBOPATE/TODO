@@ -9,6 +9,10 @@ import {
 } from 'drawably/react'
 import 'drawably/style.css'
 import './App.css'
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
+const TASKS_URL = `${API_URL}/api/tasks`
+
 function App() {
 
   const [title,setTitle ]  =useState("")
@@ -22,7 +26,7 @@ async function fetchTodos(){
   setLoading(true)
   setError("")
      try {
-  const response = await fetch("http://localhost:3000/api/tasks")
+   const response = await fetch(TASKS_URL)
   if (! response.ok){
     throw new Error   (`HTTP error! status: ${response.status}`);
   }
@@ -48,7 +52,7 @@ async function handleAddToDo() {
     return
   }
 
-  const response = await fetch("http://localhost:3000/api/tasks", {
+  const response = await fetch(TASKS_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -93,7 +97,7 @@ async function handleToggleTodo(id) {
    const todoToUpdate = todos.find((todo) => todo.id === id)
    const updateCompleted= !todoToUpdate.completed
 
-  const response = await  fetch(`http://localhost:3000/api/tasks/${id}`,{
+  const response = await  fetch(`${TASKS_URL}/${id}`,{
   method: "PATCH",
     headers:{
       "Content-Type": "application/json", 
@@ -119,7 +123,7 @@ async function handleToggleTodo(id) {
 }
 
 async function handleDeleteTodo(id) {
-  const response = await fetch(`http://localhost:3000/api/tasks/${id}`,{
+  const response = await fetch(`${TASKS_URL}/${id}`,{
     method : "DELETE",
   })
 
